@@ -53,7 +53,20 @@
   var track=$("#revTrack"), dotsBox=$("#revDots");
   if(track){
     var rcards=$$(".rev",track);
-    function step(){ return rcards.length>1 ? Math.abs(rcards[1].offsetLeft-rcards[0].offsetLeft) : Math.round(track.clientWidth*0.85); }
+    var maxLeft=function(){ return Math.max(0,track.scrollWidth-track.clientWidth); };
+    function cardTarget(i){ var c=rcards[i]; if(!c)return 0; var t=c.offsetLeft-(track.clientWidth-c.clientWidth)/2; return Math.max(0,Math.min(t,maxLeft())); }
+    function curIndex(){ var c=track.scrollLeft+track.clientWidth/2,best=0,bd=1e9; rcards.forEach(function(card,i){ var cc=card.offsetLeft+card.clientWidth/2,d=Math.abs(cc-c); if(d<bd){bd=d;best=i;} }); return best; }
+    // 手動 scrollLeft 補間（scroll-snap mandatory 會擋住 scrollBy/scrollIntoView 的 smooth，故自製）
+    var anim=null;
+    function glide(target){
+      target=Math.max(0,Math.min(target,maxLeft()));
+      if(anim)cancelAnimationFrame(anim);
+      var start=track.scrollLeft, dist=target-start, t0=null, dur=380;
+      if(Math.abs(dist)<1){ return; }
+      track.style.scrollSnapType="none";
+      function fr(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3); track.scrollLeft=Math.round(start+dist*e); if(p<1){ anim=requestAnimationFrame(fr); } else { anim=null; track.style.scrollSnapType=""; sync(); } }
+      anim=requestAnimationFrame(fr);
+    }
     function mkArrow(dir){
       var b=document.createElement("button");
       b.className="carrow carrow--"+dir; b.type="button";
@@ -65,8 +78,8 @@
     var ctrl=document.createElement("div"); ctrl.className="revctrl";
     if(dotsBox&&dotsBox.parentNode){ dotsBox.parentNode.insertBefore(ctrl,dotsBox); ctrl.appendChild(prev); ctrl.appendChild(dotsBox); ctrl.appendChild(next); }
     else { track.parentNode.appendChild(ctrl); ctrl.appendChild(prev); ctrl.appendChild(next); }
-    prev.addEventListener("click",function(){ track.scrollBy({left:-step(),behavior:"smooth"}); });
-    next.addEventListener("click",function(){ track.scrollBy({left:step(),behavior:"smooth"}); });
+    prev.addEventListener("click",function(){ glide(cardTarget(Math.max(0,curIndex()-1))); });
+    next.addEventListener("click",function(){ glide(cardTarget(Math.min(rcards.length-1,curIndex()+1))); });
 
     var dots=[];
     if(dotsBox){
@@ -74,17 +87,16 @@
         var b=document.createElement("button"); b.type="button";
         b.setAttribute("aria-label","跳至第 "+(i+1)+" 則");
         if(i===0)b.setAttribute("aria-current","true");
-        b.addEventListener("click",function(){ rcards[i].scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}); });
+        b.addEventListener("click",function(){ glide(cardTarget(i)); });
         dotsBox.appendChild(b);
       });
       dots=$$("button",dotsBox);
     }
     function sync(){
-      var c=track.scrollLeft+track.clientWidth/2,best=0,bd=1e9;
-      rcards.forEach(function(card,i){ var cc=card.offsetLeft+card.clientWidth/2,d=Math.abs(cc-c); if(d<bd){bd=d;best=i;} });
+      var best=curIndex();
       dots.forEach(function(d,i){ i===best?d.setAttribute("aria-current","true"):d.removeAttribute("aria-current"); });
       prev.disabled = track.scrollLeft<=2;
-      next.disabled = track.scrollLeft >= track.scrollWidth-track.clientWidth-2;
+      next.disabled = track.scrollLeft >= maxLeft()-2;
     }
     track.addEventListener("scroll",sync,{passive:true});
     window.addEventListener("resize",sync); sync();
