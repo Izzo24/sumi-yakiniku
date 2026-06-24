@@ -49,28 +49,57 @@
     so.observe(stats);
   }else if(stats){runCount();}
 
-  /* reviews dots */
+  /* 評價輪播：滑鼠拖曳 + 箭頭 + 分頁點 + 鍵盤 */
   var track=$("#revTrack"), dotsBox=$("#revDots");
-  if(track&&dotsBox){
+  if(track){
     var rcards=$$(".rev",track);
-    rcards.forEach(function(_,i){
+    function step(){ return rcards.length>1 ? Math.abs(rcards[1].offsetLeft-rcards[0].offsetLeft) : Math.round(track.clientWidth*0.85); }
+    function mkArrow(dir){
       var b=document.createElement("button");
-      b.setAttribute("aria-label","跳至第 "+(i+1)+" 則評價");
-      if(i===0)b.setAttribute("aria-current","true");
-      b.addEventListener("click",function(){
-        rcards[i].scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"});
+      b.className="carrow carrow--"+dir; b.type="button";
+      b.setAttribute("aria-label",dir==="prev"?"上一則評價":"下一則評價");
+      b.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="'+(dir==="prev"?"M15 5l-7 7 7 7":"M9 5l7 7-7 7")+'" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+      return b;
+    }
+    var prev=mkArrow("prev"), next=mkArrow("next");
+    var ctrl=document.createElement("div"); ctrl.className="revctrl";
+    if(dotsBox&&dotsBox.parentNode){ dotsBox.parentNode.insertBefore(ctrl,dotsBox); ctrl.appendChild(prev); ctrl.appendChild(dotsBox); ctrl.appendChild(next); }
+    else { track.parentNode.appendChild(ctrl); ctrl.appendChild(prev); ctrl.appendChild(next); }
+    prev.addEventListener("click",function(){ track.scrollBy({left:-step(),behavior:"smooth"}); });
+    next.addEventListener("click",function(){ track.scrollBy({left:step(),behavior:"smooth"}); });
+
+    var dots=[];
+    if(dotsBox){
+      rcards.forEach(function(_,i){
+        var b=document.createElement("button"); b.type="button";
+        b.setAttribute("aria-label","跳至第 "+(i+1)+" 則");
+        if(i===0)b.setAttribute("aria-current","true");
+        b.addEventListener("click",function(){ rcards[i].scrollIntoView({behavior:"smooth",inline:"center",block:"nearest"}); });
+        dotsBox.appendChild(b);
       });
-      dotsBox.appendChild(b);
-    });
-    var dots=$$("button",dotsBox);
-    track.addEventListener("scroll",function(){
+      dots=$$("button",dotsBox);
+    }
+    function sync(){
       var c=track.scrollLeft+track.clientWidth/2,best=0,bd=1e9;
-      rcards.forEach(function(card,i){
-        var cc=card.offsetLeft+card.clientWidth/2,d=Math.abs(cc-c);
-        if(d<bd){bd=d;best=i;}
-      });
-      dots.forEach(function(d,i){i===best?d.setAttribute("aria-current","true"):d.removeAttribute("aria-current");});
-    },{passive:true});
+      rcards.forEach(function(card,i){ var cc=card.offsetLeft+card.clientWidth/2,d=Math.abs(cc-c); if(d<bd){bd=d;best=i;} });
+      dots.forEach(function(d,i){ i===best?d.setAttribute("aria-current","true"):d.removeAttribute("aria-current"); });
+      prev.disabled = track.scrollLeft<=2;
+      next.disabled = track.scrollLeft >= track.scrollWidth-track.clientWidth-2;
+    }
+    track.addEventListener("scroll",sync,{passive:true});
+    window.addEventListener("resize",sync); sync();
+
+    /* 滑鼠拖曳（觸控用原生捲動，不攔截） */
+    var down=false,sx=0,sl=0,moved=false;
+    track.addEventListener("pointerdown",function(e){ if(e.pointerType!=="mouse")return; down=true;moved=false;sx=e.clientX;sl=track.scrollLeft;track.classList.add("grabbing"); try{track.setPointerCapture(e.pointerId);}catch(_){} });
+    track.addEventListener("pointermove",function(e){ if(!down)return; var dx=e.clientX-sx; if(Math.abs(dx)>4)moved=true; track.scrollLeft=sl-dx; });
+    function pUp(e){ if(!down)return; down=false; track.classList.remove("grabbing"); try{track.releasePointerCapture(e.pointerId);}catch(_){} }
+    track.addEventListener("pointerup",pUp); track.addEventListener("pointercancel",pUp); track.addEventListener("pointerleave",pUp);
+    track.addEventListener("click",function(e){ if(moved){ e.stopPropagation(); e.preventDefault(); } },true);
+
+    /* 鍵盤左右鍵 */
+    track.setAttribute("tabindex","0"); track.setAttribute("role","group"); track.setAttribute("aria-label","評價輪播，可拖曳或用箭頭切換");
+    track.addEventListener("keydown",function(e){ if(e.key==="ArrowRight"){next.click();e.preventDefault();} else if(e.key==="ArrowLeft"){prev.click();e.preventDefault();} });
   }
 
   /* star ratings */
@@ -79,13 +108,15 @@
     s.style.setProperty("--p",(r/5*100)+"%");
   });
 
-  /* back to top */
-  var totop=$("#totop");
-  if(totop){
+  /* back to top + floating cta */
+  var totop=$("#totop"), floatcta=$(".floatcta");
+  if(totop||floatcta){
     window.addEventListener("scroll",function(){
-      totop.classList.toggle("show",window.scrollY>window.innerHeight*0.9);
+      var past=window.scrollY>window.innerHeight*0.9;
+      if(totop)totop.classList.toggle("show",past);
+      if(floatcta)floatcta.classList.toggle("show",past);
     },{passive:true});
-    totop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
+    if(totop)totop.addEventListener("click",function(){window.scrollTo({top:0,behavior:"smooth"});});
   }
 
   /* toast */
@@ -252,9 +283,10 @@
     updateBadge(); render();
   });
 
-  function addItem(name,price){
+  function addItem(name,price,qty){
+    qty=qty||1;
     var ex=cart.filter(function(i){return i.name===name && i.price===price;})[0];
-    if(ex)ex.qty++; else cart.push({name:name,price:price,qty:1});
+    if(ex)ex.qty+=qty; else cart.push({name:name,price:price,qty:qty});
     updateBadge();
   }
   function priceFrom(btn){
@@ -263,6 +295,19 @@
     if(!el)return NaN;
     return parseInt(el.textContent.replace(/[^\d]/g,""),10);
   }
+  function cardQty(btn){
+    var card=btn.closest("article")||btn.closest("section")||btn.parentElement;
+    var n=card&&card.querySelector(".qtypick__n");
+    return n?Math.max(1,parseInt(n.textContent,10)||1):1;
+  }
+
+  // on-card quantity pickers
+  document.addEventListener("click",function(e){
+    var b=e.target.closest(".qtypick__b"); if(!b)return;
+    var box=b.closest(".qtypick"), n=box.querySelector(".qtypick__n");
+    var v=(parseInt(n.textContent,10)||1)+(b.getAttribute("data-d")==="inc"?1:-1);
+    n.textContent=v<1?1:v;
+  });
 
   $$(".add").forEach(function(btn){
     btn.addEventListener("click",function(e){
@@ -270,7 +315,7 @@
       var name=btn.getAttribute("data-name")||"商品";
       var price=priceFrom(btn);
       if(isNaN(price)){ view="cart"; openCart(); return; } // 無價格的 CTA → 直接開購物車
-      addItem(name,price);
+      addItem(name,price,cardQty(btn));
       showToast(ADD_LABEL+"："+name);
       view="cart"; openCart();
     });
@@ -282,8 +327,19 @@
   document.addEventListener("keydown",function(e){ if(e.key==="Escape"&&modal.classList.contains("open"))closeCart(); });
   updateBadge();
 
+  /* 聯絡表單（示範） */
+  var cform=$("#contactForm");
+  if(cform){
+    cform.addEventListener("submit",function(e){
+      e.preventDefault();
+      var nm=cform.querySelector("[name=name]");
+      if(nm&&!nm.value.trim()){nm.focus();nm.classList.add("err");return;}
+      cform.innerHTML='<div class="cf-done"><svg viewBox="0 0 48 48" width="50" height="50" aria-hidden="true"><circle cx="24" cy="24" r="22" fill="none" stroke="currentColor" stroke-width="3"/><path d="M15 24l6 6 12-13" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg><h3>已收到您的訊息</h3><p>這是設計作品示範，不會真的送出或留存資料。我們會盡快與您聯繫。</p></div>';
+    });
+  }
+
   /* scroll reveal */
-  var targets=$$(".card, .sec-head, .hero__copy, .hero__media, .steps li, .stat");
+  var targets=$$(".card, .sec-head, .hero__copy, .hero__media, .steps li, .stat, .imgblock, .shopcard");
   targets.forEach(function(t){t.classList.add("reveal");});
   if("IntersectionObserver" in window){
     var ro=new IntersectionObserver(function(es){

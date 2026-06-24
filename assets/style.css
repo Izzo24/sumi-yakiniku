@@ -260,3 +260,14 @@ section{padding:88px 0}
 @media(max-width:560px){.cactions{flex-direction:column}}
 
 .foot__static{display:block;font-size:.94rem;padding:5px 0;opacity:.9}
+
+/* 輪播控制：拖曳 + 箭頭 + 點 */
+.rev-track{cursor:grab}
+.rev-track.grabbing{cursor:grabbing;scroll-snap-type:none;scroll-behavior:auto;user-select:none}
+.revctrl{display:flex;align-items:center;justify-content:center;gap:16px;margin-top:18px;flex-wrap:wrap}
+.revctrl .rev-dots{margin-top:0}
+.carrow{display:flex;align-items:center;justify-content:center;cursor:pointer;transition:.2s;flex:none}
+.carrow:disabled{opacity:.35;cursor:default}
+
+.carrow{width:46px;height:46px;border-radius:6px;border:1.5px solid var(--gold);background:var(--panel);color:var(--gold-2)}
+.carrow:hover:not(:disabled){background:var(--gold);color:#241405}
