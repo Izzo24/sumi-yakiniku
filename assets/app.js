@@ -73,6 +73,13 @@
     },{passive:true});
   }
 
+
+  /* star ratings */
+  $$(".stars[data-rating]").forEach(function(s){
+    var r=parseFloat(s.getAttribute("data-rating"))||5;
+    s.style.setProperty("--p",(r/5*100)+"%");
+  });
+
   /* back to top */
   var totop=$("#totop");
   if(totop){
