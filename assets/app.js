@@ -52,25 +52,25 @@
   /* 評價輪播：滑鼠拖曳 + 箭頭 + 分頁點 + 鍵盤 */
   var track=$("#revTrack"), dotsBox=$("#revDots");
   if(track){
-    var rcards=$$(".rev",track);
+    // 頁式輪播：分頁點數量＝實際可捲動的頁數（依視窗寬度而定），避免「點數與項目對不上」
     var maxLeft=function(){ return Math.max(0,track.scrollWidth-track.clientWidth); };
-    function cardTarget(i){ var c=rcards[i]; if(!c)return 0; var t=c.offsetLeft-(track.clientWidth-c.clientWidth)/2; return Math.max(0,Math.min(t,maxLeft())); }
-    function curIndex(){ var c=track.scrollLeft+track.clientWidth/2,best=0,bd=1e9; rcards.forEach(function(card,i){ var cc=card.offsetLeft+card.clientWidth/2,d=Math.abs(cc-c); if(d<bd){bd=d;best=i;} }); return best; }
-    // 手動 scrollLeft 補間（scroll-snap mandatory 會擋住 scrollBy/scrollIntoView 的 smooth，故自製）
+    var pageW=function(){ return Math.max(1,track.clientWidth); };
+    var pageCount=function(){ return Math.max(1, Math.ceil(maxLeft()/pageW()-0.001)+1); };
+    var pageLeft=function(i){ return Math.max(0,Math.min(i*pageW(),maxLeft())); };
+    var curPage=function(){ return Math.max(0,Math.min(Math.round(track.scrollLeft/pageW()),pageCount()-1)); };
     var anim=null;
     function glide(target){
       target=Math.max(0,Math.min(target,maxLeft()));
       if(anim)cancelAnimationFrame(anim);
       var start=track.scrollLeft, dist=target-start, t0=null, dur=380;
-      if(Math.abs(dist)<1){ return; }
-      track.style.scrollSnapType="none";
-      function fr(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3); track.scrollLeft=Math.round(start+dist*e); if(p<1){ anim=requestAnimationFrame(fr); } else { anim=null; track.style.scrollSnapType=""; sync(); } }
+      if(Math.abs(dist)<1){ sync(); return; }
+      function fr(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3); track.scrollLeft=Math.round(start+dist*e); if(p<1){ anim=requestAnimationFrame(fr); } else { anim=null; sync(); } }
       anim=requestAnimationFrame(fr);
     }
     function mkArrow(dir){
       var b=document.createElement("button");
       b.className="carrow carrow--"+dir; b.type="button";
-      b.setAttribute("aria-label",dir==="prev"?"上一則評價":"下一則評價");
+      b.setAttribute("aria-label",dir==="prev"?"上一頁評價":"下一頁評價");
       b.innerHTML='<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="'+(dir==="prev"?"M15 5l-7 7 7 7":"M9 5l7 7-7 7")+'" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
       return b;
     }
@@ -78,28 +78,27 @@
     var ctrl=document.createElement("div"); ctrl.className="revctrl";
     if(dotsBox&&dotsBox.parentNode){ dotsBox.parentNode.insertBefore(ctrl,dotsBox); ctrl.appendChild(prev); ctrl.appendChild(dotsBox); ctrl.appendChild(next); }
     else { track.parentNode.appendChild(ctrl); ctrl.appendChild(prev); ctrl.appendChild(next); }
-    prev.addEventListener("click",function(){ glide(cardTarget(Math.max(0,curIndex()-1))); });
-    next.addEventListener("click",function(){ glide(cardTarget(Math.min(rcards.length-1,curIndex()+1))); });
+    prev.addEventListener("click",function(){ glide(pageLeft(curPage()-1)); });
+    next.addEventListener("click",function(){ glide(pageLeft(curPage()+1)); });
 
     var dots=[];
-    if(dotsBox){
-      rcards.forEach(function(_,i){
-        var b=document.createElement("button"); b.type="button";
-        b.setAttribute("aria-label","跳至第 "+(i+1)+" 則");
-        if(i===0)b.setAttribute("aria-current","true");
-        b.addEventListener("click",function(){ glide(cardTarget(i)); });
-        dotsBox.appendChild(b);
-      });
+    function buildDots(){
+      if(!dotsBox)return;
+      var n=pageCount();
+      if(dots.length===n)return;
+      dotsBox.innerHTML="";
+      for(var k=0;k<n;k++){ (function(i){ var b=document.createElement("button"); b.type="button"; b.setAttribute("aria-label","第 "+(i+1)+" 頁評價"); b.addEventListener("click",function(){ glide(pageLeft(i)); }); dotsBox.appendChild(b); })(k); }
       dots=$$("button",dotsBox);
     }
     function sync(){
-      var best=curIndex();
-      dots.forEach(function(d,i){ i===best?d.setAttribute("aria-current","true"):d.removeAttribute("aria-current"); });
+      var p=curPage();
+      dots.forEach(function(d,i){ i===p?d.setAttribute("aria-current","true"):d.removeAttribute("aria-current"); });
       prev.disabled = track.scrollLeft<=2;
       next.disabled = track.scrollLeft >= maxLeft()-2;
     }
+    buildDots(); sync();
     track.addEventListener("scroll",sync,{passive:true});
-    window.addEventListener("resize",sync); sync();
+    var _rt; window.addEventListener("resize",function(){ clearTimeout(_rt); _rt=setTimeout(function(){ dots=[]; buildDots(); sync(); },150); });
 
     /* 滑鼠拖曳（觸控用原生捲動，不攔截） */
     var down=false,sx=0,sl=0,moved=false;

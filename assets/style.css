@@ -125,7 +125,7 @@ section{padding:88px 0}
 
 /* reviews */
 .reviews{background:var(--bg-2)}
-.rev-track{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:x mandatory;padding:6px 2px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.rev-track{display:flex;gap:24px;overflow-x:auto;scroll-snap-type:none;padding:6px 2px 18px;-webkit-overflow-scrolling:touch;scrollbar-width:none}
 .rev-track::-webkit-scrollbar{display:none}
 .rev{flex:0 0 360px;max-width:88vw;scroll-snap-align:center;padding:28px 26px}
 .stars{display:inline-block;width:120px;height:22px;margin-bottom:12px;--p:100%;background:linear-gradient(90deg,var(--gold) 0 var(--p),#4a3a2c var(--p) 100%);-webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 17.3l-6.18 3.7 1.64-7.03L2 9.24l7.19-.61L12 2l2.81 6.63 7.19.61-5.46 4.73 1.64 7.03z' fill='%23000'/%3E%3C/svg%3E") 0 0/24px 24px repeat-x;mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 17.3l-6.18 3.7 1.64-7.03L2 9.24l7.19-.61L12 2l2.81 6.63 7.19.61-5.46 4.73 1.64 7.03z' fill='%23000'/%3E%3C/svg%3E") 0 0/24px 24px repeat-x}
