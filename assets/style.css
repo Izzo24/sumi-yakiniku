@@ -279,3 +279,4 @@ section{padding:88px 0}
 .nav__cta{margin-left:16px}
 .cartbtn{margin-left:8px}
 
+@media(max-width:1080px){.menu{display:none}.burger{display:flex}}
