@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://izzo24.github.io/sumi-yakiniku/sitemap.xml
