@@ -38,7 +38,7 @@ p{text-wrap:pretty}
 .nav{position:sticky;top:0;z-index:100;background:rgba(21,16,13,.82);backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
 .nav__in{display:flex;align-items:center;gap:20px;height:74px}
 .brand{display:flex;align-items:center;gap:11px}
-.brand__tx{display:flex;flex-direction:column;line-height:1.05}
+.brand__tx{display:flex;flex-direction:column;line-height:1.1;gap:4px}
 .brand__tx b{font-family:var(--serif);font-size:1.24rem;font-weight:900;letter-spacing:.06em;color:var(--ink)}
 .brand__tx i{font-family:var(--cor);font-style:normal;font-weight:700;font-size:.7rem;letter-spacing:.34em;color:var(--gold)}
 .menu{display:flex;gap:4px;margin-left:auto}
