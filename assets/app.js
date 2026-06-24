@@ -53,11 +53,12 @@
   var track=$("#revTrack"), dotsBox=$("#revDots");
   if(track){
     // 頁式輪播：分頁點數量＝實際可捲動的頁數（依視窗寬度而定），避免「點數與項目對不上」
+    var rcards=$$(".rev",track);
     var maxLeft=function(){ return Math.max(0,track.scrollWidth-track.clientWidth); };
-    var pageW=function(){ return Math.max(1,track.clientWidth); };
-    var pageCount=function(){ return Math.max(1, Math.ceil(maxLeft()/pageW()-0.001)+1); };
-    var pageLeft=function(i){ return Math.max(0,Math.min(i*pageW(),maxLeft())); };
-    var curPage=function(){ return Math.max(0,Math.min(Math.round(track.scrollLeft/pageW()),pageCount()-1)); };
+    var step=function(){ return rcards.length>1 ? Math.max(1,Math.abs(rcards[1].offsetLeft-rcards[0].offsetLeft)) : Math.max(1,track.clientWidth); };
+    var pageCount=function(){ return maxLeft()<=2 ? 1 : Math.ceil(maxLeft()/step()-0.001)+1; };
+    var pageLeft=function(i){ return Math.max(0,Math.min(i*step(),maxLeft())); };
+    var curPage=function(){ var n=pageCount(),best=0,bd=1e9; for(var i=0;i<n;i++){ var d=Math.abs(track.scrollLeft-pageLeft(i)); if(d<bd){bd=d;best=i;} } return best; };
     var anim=null;
     function glide(target){
       target=Math.max(0,Math.min(target,maxLeft()));
