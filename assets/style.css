@@ -1,5 +1,5 @@
 :root{
-  --bg:#15100d; --bg-2:#1d1611; --panel:#221a14; --ink:#f3eae0; --ink-2:#b6a695;
+  --bg:#15100d; --bg-2:#1d1611; --panel:#221a14; --ink:#fff; --ink-2:#b6a695;
   --gold:#d99a4e; --gold-2:#e8b873; --red:#9a2f22; --red-2:#c0392b; --line:#352a22;
   --r:16px; --r-sm:11px; --maxw:1180px;
   --shadow:0 14px 36px -16px rgba(0,0,0,.7); --shadow-lg:0 30px 70px -28px rgba(0,0,0,.85);
@@ -271,3 +271,11 @@ section{padding:88px 0}
 
 .carrow{width:46px;height:46px;border-radius:6px;border:1.5px solid var(--gold);background:var(--panel);color:var(--gold-2)}
 .carrow:hover:not(:disabled){background:var(--gold);color:#241405}
+
+/* header 選單靠右・排版優化 */
+.nav__in{gap:14px}
+.menu{margin-left:auto;gap:clamp(3px,.55vw,9px)}
+.menu a{padding:8px 12px}
+.nav__cta{margin-left:16px}
+.cartbtn{margin-left:8px}
+
