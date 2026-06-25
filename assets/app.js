@@ -97,15 +97,16 @@
       prev.disabled = track.scrollLeft<=2;
       next.disabled = track.scrollLeft >= maxLeft()-2;
     }
+    var _snapT;function snapIdle(){clearTimeout(_snapT);_snapT=setTimeout(function(){if(anim||down)return;var tt=pageLeft(curPage());if(Math.abs(track.scrollLeft-tt)>2)glide(tt);},120);}
     buildDots(); sync();
-    track.addEventListener("scroll",sync,{passive:true});
+    track.addEventListener("scroll",function(){sync();snapIdle();},{passive:true});
     var _rt; window.addEventListener("resize",function(){ clearTimeout(_rt); _rt=setTimeout(function(){ dots=[]; buildDots(); sync(); },150); });
 
     /* 滑鼠拖曳（觸控用原生捲動，不攔截） */
     var down=false,sx=0,sl=0,moved=false;
     track.addEventListener("pointerdown",function(e){ if(e.pointerType!=="mouse")return; down=true;moved=false;sx=e.clientX;sl=track.scrollLeft;track.classList.add("grabbing"); try{track.setPointerCapture(e.pointerId);}catch(_){} });
     track.addEventListener("pointermove",function(e){ if(!down)return; var dx=e.clientX-sx; if(Math.abs(dx)>4)moved=true; track.scrollLeft=sl-dx; });
-    function pUp(e){ if(!down)return; down=false; track.classList.remove("grabbing"); try{track.releasePointerCapture(e.pointerId);}catch(_){} }
+    function pUp(e){ if(!down)return; down=false; track.classList.remove("grabbing"); try{track.releasePointerCapture(e.pointerId);}catch(_){} if(moved)glide(pageLeft(curPage())); }
     track.addEventListener("pointerup",pUp); track.addEventListener("pointercancel",pUp); track.addEventListener("pointerleave",pUp);
     track.addEventListener("click",function(e){ if(moved){ e.stopPropagation(); e.preventDefault(); } },true);
 
