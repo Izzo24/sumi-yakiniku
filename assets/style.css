@@ -290,3 +290,8 @@ section{padding:88px 0}
   .cartbtn svg{width:25px;height:25px}
   .cartbtn__n{top:-2px;right:-2px;border:2px solid var(--bg)}
 }
+
+/* 手機版：回頂端鈕上移，避免與右下角購物車 FAB（58px）重疊。 */
+@media(max-width:860px){
+  .totop{bottom:88px;right:23px}
+}
