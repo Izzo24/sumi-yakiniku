@@ -290,3 +290,5 @@ section{padding:88px 0}
   .cartbtn__n{top:-2px;right:-2px;border:2px solid var(--bg,#15100d)}
   .totop{bottom:88px;right:23px}
 }
+/* 手機版：購物車鈕移出 nav 後，漢堡鈕需自行靠右（原本靠 menu/cart 推右）。 */
+@media(max-width:1080px){ .burger{margin-left:auto} }
