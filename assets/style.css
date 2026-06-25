@@ -290,3 +290,8 @@ section{padding:88px 0}
 .menu.open{display:flex!important;position:fixed;inset:74px 0 auto 0;flex-direction:column;gap:0;background:var(--bg-2);border-bottom:1px solid var(--line);padding:10px 24px 22px;box-shadow:var(--shadow);transform:none!important;z-index:99}
 .menu.open a{padding:13px 6px;font-size:1.05rem;border-bottom:1px solid var(--line)}
 .cartbtn{margin-left:0!important}
+
+
+/* 購物車「繼續購物」外框鈕 */
+.cbtn-ghost{width:100%;margin-top:10px;display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--c-ink);border:1px solid var(--c-line);border-radius:30px;padding:11px 20px;font-family:var(--tc);font-weight:500;font-size:.98rem;cursor:pointer;transition:.2s}
+.cbtn-ghost:hover{border-color:var(--c-accent);color:var(--c-accent)}

@@ -221,10 +221,11 @@
           (t.ship!==0?'<p class="csum__hint">再買 '+money(SHIP_FREE-t.sub)+' 即可免運</p>':'')+
           '<div class="csum__row csum__total"><span>合計</span><span>'+money(t.total)+'</span></div>'+
         '</div>'+
-        '<button class="btn btn--cta cbtn-full" id="toCheckout">前往結帳</button>'+
+        '<button class="btn btn--cta cbtn-full" id="toCheckout">前往結帳</button>'+'<button class="cbtn-ghost" id="keepShop">繼續購物</button>'+
         '<p class="cnote">這是設計作品示範，不會真的收費或出貨。</p>';
       cartBody.innerHTML=html;
       $("#toCheckout").addEventListener("click",function(){view="checkout";render();});
+      $("#keepShop").addEventListener("click",closeCart);
     }
     else if(view==="checkout"){
       hdTitle.textContent="結帳";
