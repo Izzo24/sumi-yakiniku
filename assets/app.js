@@ -160,8 +160,9 @@
   cartBtn.className="cartbtn"; cartBtn.id="cartBtn";
   cartBtn.setAttribute("aria-label","開啟購物車");
   cartBtn.innerHTML=bagIcon+'<span class="cartbtn__n" id="cartCount" aria-hidden="true">0</span>';
-  var navIn=$(".nav__in");
-  if(navIn){ var bg=$("#burger"); navIn.insertBefore(cartBtn, bg||null); }
+  // 直接掛到 body（不放進 nav）：nav 有 backdrop-filter 會讓 position:fixed
+  // 相對 nav 而非視窗，導致無法固定右下。掛 body 後 fixed 才相對視窗。
+  document.body.appendChild(cartBtn);
 
   var wrap=document.createElement("div");
   wrap.className="cartmodal"; wrap.id="cartModal";
