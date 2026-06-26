@@ -295,3 +295,12 @@ section{padding:88px 0}
 /* 購物車「繼續購物」外框鈕 */
 .cbtn-ghost{width:100%;margin-top:10px;display:inline-flex;align-items:center;justify-content:center;background:transparent;color:var(--c-ink);border:1px solid var(--c-line);border-radius:30px;padding:11px 20px;font-family:var(--tc);font-weight:500;font-size:.98rem;cursor:pointer;transition:.2s}
 .cbtn-ghost:hover{border-color:var(--c-accent);color:var(--c-accent)}
+
+
+/* 規範:電腦版 Logo 左 + 橫向導覽(覆寫舊「漢堡置中／Logo置中」標準 header,2026-06-26) */
+@media(min-width:861px){
+  .nav__in{justify-content:space-between!important}
+  .nav__in .brand{position:static!important;left:auto!important;transform:none!important;margin:0!important}
+  .menu{display:flex!important;flex-direction:row!important;position:static!important;inset:auto!important;transform:none!important;background:none!important;border:0!important;box-shadow:none!important;padding:0!important;margin-left:auto!important}
+  .burger{display:none!important}
+}
